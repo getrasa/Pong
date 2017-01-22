@@ -25,6 +25,7 @@
                 update: function() {
                     if(keystate[UpArrow]) this.y -= 7;
                     if(keystate[DownArrow]) this.y += 7;
+                    this.y = Math.max(Math.min(this.y, HEIGHT - this.height), 0)
                 },
                 draw: function() {
                     ctx.fillRect(this.x, this.y, this.width, this.height);
@@ -39,7 +40,9 @@
                 
                 
                 update: function() {
-                    this.y = (ball.y+ball.side/2) - this.height/2
+                    var desty = ball.y - (this.height - ball.side)*0.5;
+                    this.y += (desty - this.y) * 0.1;
+                    this.y = Math.max(Math.min(this.y, HEIGHT - this.height), 0)
                 },
                 draw: function() {
                     ctx.fillRect(this.x, this.y, this.width, this.height);
@@ -50,7 +53,7 @@
                 x: null,
                 y: null,
                 side: 20,
-                speed: 5,
+                speed: 10,
                 
                 update: function() {
                     this.x += this.vel.x;
@@ -66,10 +69,22 @@
                     if(AABBIntersect(pdle.x, pdle.y, pdle.width, pdle.height,
                                     this.x, this.y, this.side, this.side)
                       ) {
+                        this.x = pdle===player ? player.x+player.width : ai.x - this.side;
                         var n = (this.y+this.side - pdle.y)/(pdle.height+this.side);
                         var phi = 0.25*pi*(2*n - 1); // pi/4 = 45
-                        this.vel.x = (pdle===player ? 1 : -1)*this.speed*Math.cos(phi);
-                        this.vel.y = this.speed*Math.sin(phi);
+                        
+                        var smash = Math.abs(phi) > 0.2*pi ? 1.5 :1;
+                        this.vel.x = smash*(pdle===player ? 1 : -1)*this.speed*Math.cos(phi);
+                        this.vel.y = smash*this.speed*Math.sin(phi);
+                    }
+                    if(0 > this.x+this.side || this.x > WIDTH) {
+                        ball.x = (WIDTH -ball.side)/2;
+                        ball.y = (HEIGHT - ball.side)/2;
+                        
+                        ball.vel = {
+                            x: ball.speed,
+                            y:0
+                        }
                     }
                     
                 },
