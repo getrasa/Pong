@@ -1,3 +1,3 @@
 # Pong
 My Game Pong
-Game Pong in javascript/html
+in javascript/html
